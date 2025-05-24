@@ -10,6 +10,7 @@ venv/
 
 # FastAPI/Backend
 backend/__pycache__/
+backend/uploaded_files/
 backend/.pytest_cache/
 backend/.mypy_cache/
 backend/.coverage
