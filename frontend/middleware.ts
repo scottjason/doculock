@@ -8,6 +8,7 @@ function generateNonce() {
 
 export function middleware() {
   const isProd = process.env.NODE_ENV === 'production';
+  const apiOrigin = process.env.API_ORIGIN;
   const origin = 'https://doculock.vercel.app';
   const nonce = generateNonce();
 
@@ -18,7 +19,7 @@ export function middleware() {
     style-src 'self' ${origin};
     img-src 'self' ${origin} data:;
     font-src 'self' ${origin};
-    connect-src 'self' ${origin};
+    connect-src 'self' ${origin} ${apiOrigin};
   `.replace(/\n/g, '');
 
   const devCSP = "frame-ancestors 'none'";
