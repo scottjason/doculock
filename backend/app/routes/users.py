@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from typing import List
 from app.db.session import get_session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
-from typing import List
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

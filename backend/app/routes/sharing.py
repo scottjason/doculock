@@ -1,14 +1,14 @@
 import uuid
-from sqlalchemy import select
-from fastapi import APIRouter, Depends, HTTPException, Body, Path
 from fastapi import (
+    Body,
+    Path,
     Depends,
     HTTPException,
     APIRouter,
 )
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_session
-from app.models.user import User
 from app.models.file import File
 from app.models.shared_file import SharedFile
 
@@ -23,7 +23,6 @@ async def share_file(
     guest_email: str = Body(None),
     session: AsyncSession = Depends(get_session),
 ):
-    # Ensure file exists
     db_file = await session.get(File, file_id)
     if not db_file:
         raise HTTPException(status_code=404, detail="File not found")
