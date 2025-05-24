@@ -1,13 +1,11 @@
-from fastapi import (
-    FastAPI,
-)
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, Response, APIRouter
 from app.routes import users, files, sharing
 
 
-class SecureHeadersMiddleware(BaseHTTPMiddleware):
+class SecurityHeaders(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
@@ -30,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SecureHeadersMiddleware)
+app.add_middleware(SecurityHeaders)
 
 
 health_router = APIRouter(prefix="/api")
