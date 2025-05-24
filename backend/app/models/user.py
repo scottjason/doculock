@@ -1,8 +1,11 @@
-from sqlmodel import SQLModel, Field
 import uuid
+from sqlalchemy import Column, String, Boolean
+from sqlalchemy.dialects.postgresql import UUID
+from .base import Base
 
 
-class User(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    email: str
-    is_active: bool = True
+class User(Base):
+    __tablename__ = "user"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    is_active = Column(Boolean, default=True)
