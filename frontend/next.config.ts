@@ -1,29 +1,7 @@
-const isProd = process.env.NODE_ENV === 'production';
-
-const origin = 'https://doculock.vercel.app';
-
-const prodCSP = `
-  frame-ancestors 'none';
-  default-src 'none';
-  script-src 'self' ${origin};
-  style-src 'self' ${origin};
-  img-src 'self' ${origin} data:;
-  font-src 'self' ${origin};
-  connect-src 'self' ${origin};
-`.replace(/\n/g, '');
-
-const devCSP = "frame-ancestors 'none'";
-
-const ContentSecurityPolicy = isProd ? prodCSP : devCSP;
-
 const securityHeaders = [
   {
     key: 'Cache-Control',
     value: 'no-store',
-  },
-  {
-    key: 'Content-Security-Policy',
-    value: ContentSecurityPolicy,
   },
   {
     key: 'Strict-Transport-Security',
