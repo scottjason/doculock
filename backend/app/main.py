@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -19,10 +20,14 @@ class SecurityHeaders(BaseHTTPMiddleware):
         return response
 
 
+allowed_origin = os.environ.get("ALLOWED_ORIGIN", "http://localhost:3000")
+
+allowed_origins = [allowed_origin]
+
 app = FastAPI(title="DocuLock API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

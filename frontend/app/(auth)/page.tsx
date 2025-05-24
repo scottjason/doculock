@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaLock } from 'react-icons/fa';
 
 export default function Authenticate() {
@@ -25,6 +25,24 @@ export default function Authenticate() {
     // If email is present, send to backend for passkey challenge
     // If no email, start discoverable credentials flow
   }
+
+  useEffect(() => {
+    const runHealthCheck = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`);
+        if (!response.ok) {
+          throw new Error('Server is not healthy');
+        } else {
+          console.log('Health check passed');
+        }
+      } catch (err) {
+        console.error('Health check failed:', err);
+        setError('Unable to connect to the server. Please try again later.');
+      }
+    };
+
+    runHealthCheck();
+  }, []);
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-[#111d28]'>
