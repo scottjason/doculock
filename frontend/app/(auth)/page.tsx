@@ -1,27 +1,24 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { FaLock } from 'react-icons/fa';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 
 export default function Authenticate() {
-  const [step, setStep] = useState<'main' | 'passkey'>('main');
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<'main' | 'passkey'>('main');
 
-  async function onEmailSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onEmailSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setError(null);
-    setLoading(true);
-    // Optionally: validate email, call backend, etc.
-    setTimeout(() => {
-      setStep('passkey');
-      setLoading(false);
-    }, 400); // Simulate delay
+    setIsLoading(true);
+    console.log('Email submitted:', email);
   }
 
   async function onPasskeySignIn() {
     setError(null);
-    setLoading(true);
+    setIsLoading(true);
     // If email is present, send to backend for passkey challenge
     // If no email, start discoverable credentials flow
   }
@@ -47,13 +44,7 @@ export default function Authenticate() {
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-[#111d28]'>
       <div className='flex w-full max-w-md flex-col gap-3 rounded-2xl border border-[#202f40] bg-[#172337]/80 p-8 shadow-lg'>
-        <div className='relative mb-6 flex flex-col items-center justify-center'>
-          <FaLock className='pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-7xl text-white opacity-10' />
-          <h1 className='relative z-10 text-center text-3xl font-bold text-white opacity-90'>
-            DocuLock
-          </h1>
-        </div>
-
+        <Header />
         {step === 'main' ? (
           <>
             <form onSubmit={onEmailSubmit} className='flex flex-col gap-4'>
@@ -66,15 +57,15 @@ export default function Authenticate() {
                 onChange={e => setEmail(e.target.value)}
                 className='rounded-lg border border-[#253249] bg-[#101b26] px-4 py-3 text-white outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#4cce97]'
                 required
-                disabled={loading}
+                disabled={isLoading}
               />
               <button
                 type='submit'
                 className='rounded-xl bg-[#4cce97] py-3 font-semibold text-[#111d28] transition hover:bg-[#3c9e75] disabled:bg-[#294c3b]'
-                disabled={loading}
+                disabled={isLoading}
               >
                 <span className='text-black opacity-70'>
-                  {loading ? 'Checking...' : 'Continue'}
+                  {isLoading ? 'Checking...' : 'Continue'}
                 </span>
               </button>
             </form>
@@ -87,10 +78,10 @@ export default function Authenticate() {
               type='button'
               className='w-full rounded-xl bg-[#4cce97] px-8 py-3 text-lg font-semibold text-[#111d28] transition hover:bg-[#3c9e75] disabled:bg-[#294c3b]'
               onClick={onPasskeySignIn}
-              disabled={loading}
+              disabled={isLoading}
             >
               <span className='text-black opacity-70'>
-                {loading ? 'Starting Passkey...' : 'Sign in with Passkey'}
+                {isLoading ? 'Starting Passkey...' : 'Sign in with Passkey'}
               </span>
             </button>
             {error && <div className='pt-2 text-center text-sm text-red-400'>{error}</div>}
@@ -102,15 +93,15 @@ export default function Authenticate() {
               type='button'
               className='rounded-xl bg-[#4cce97] px-8 py-3 text-lg font-semibold text-[#111d28] transition hover:bg-[#3c9e75] disabled:bg-[#294c3b]'
               onClick={onPasskeySignIn}
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? 'Starting Passkey...' : 'Sign in with Passkey'}
+              {isLoading ? 'Starting Passkey...' : 'Sign in with Passkey'}
             </button>
             <button
               type='button'
               className='mt-2 text-xs font-semibold text-[#4cce97] underline'
               onClick={() => setStep('main')}
-              disabled={loading}
+              disabled={isLoading}
             >
               Change email
             </button>
@@ -124,7 +115,7 @@ export default function Authenticate() {
           Enter your email for personalized accounts, or just sign in with your device.
         </div>
       </div>
-      <footer className='mt-6 text-xs text-gray-500'>© {new Date().getFullYear()} DocuLock</footer>
+      <Footer />
     </div>
   );
 }
