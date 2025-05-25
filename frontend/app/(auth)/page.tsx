@@ -32,12 +32,44 @@ export default function Authenticate() {
     }
   };
 
+  const registerPasskey = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register-passkey`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
+      if (!response.ok) {
+        console.error('Error registering passkey:', response.statusText);
+        setError('Failed to register passkey. Please try again.');
+        setIsLoading(false);
+      } else {
+        const data = await response.json();
+        console.log('Passkey registration response:', data);
+      }
+    } catch (error) {
+      console.error('Error during passkey registration:', error);
+      setError('An error occurred while registering the passkey. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
   async function onEmailSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setError(null);
     setIsLoading(true);
     const result = await checkEmail(email);
-    console.log('Email check result:', result);
+    if (!result) {
+      console.log('Email does not exist, proceeding to passkey registration');
+      registerPasskey();
+    } else {
+      console.log('Email exists, proceeding to passkey sign-in');
+    }
   }
 
   async function onPasskeySignIn() {
