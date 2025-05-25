@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:15
     container_name: doculock-db
     restart: unless-stopped
     ports:

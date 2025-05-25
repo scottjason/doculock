@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, Response, APIRouter
-from app.routes import users, files, sharing
+from app.routes import auth, users, files, sharing
 
 
 class SecurityHeaders(BaseHTTPMiddleware):
@@ -45,6 +45,7 @@ async def health_check():
 
 
 app.include_router(health_router)
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(files.router)
 app.include_router(sharing.router)

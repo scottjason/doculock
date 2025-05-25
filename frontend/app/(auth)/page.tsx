@@ -9,11 +9,35 @@ export default function Authenticate() {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<'main' | 'passkey'>('main');
 
+  const checkEmail = async (email: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/check-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (!response.ok) {
+        // Optionally handle/log error here
+        return false;
+      }
+      const data = await response.json();
+      console.log('Email check response:', data);
+      // Assuming the API returns { exists: boolean }
+      return data.exists === true;
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false;
+    }
+  };
+
   async function onEmailSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setError(null);
     setIsLoading(true);
-    console.log('Email submitted:', email);
+    const result = await checkEmail(email);
+    console.log('Email check result:', result);
   }
 
   async function onPasskeySignIn() {
