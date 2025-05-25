@@ -2,126 +2,13 @@
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-
-type RegistrationPayload = {
-  email: string;
-  user_id: string;
-  credential: {
-    id: string;
-    rawId: string;
-    type: string;
-    response: {
-      attestationObject: string;
-      clientDataJSON: string;
-    };
-    authenticatorAttachment?: string;
-  };
-};
+import { checkEmail, registerPasskey } from '../requests/authRequests';
 
 export default function Authenticate() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<'main' | 'passkey'>('main');
-
-  const base64urlToUint8Array = (base64urlString: string): Uint8Array => {
-    const base64 =
-      base64urlString.replace(/-/g, '+').replace(/_/g, '/') +
-      '='.repeat((4 - (base64urlString.length % 4)) % 4);
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-  };
-
-  function bufferToBase64url(buffer: ArrayBuffer | Uint8Array): string {
-    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-    let binary = '';
-    for (const b of bytes) binary += String.fromCharCode(b);
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
-
-  const checkEmail = async (email: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/check-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-      if (!response.ok) {
-        // Optionally handle/log error here
-        return false;
-      }
-      const data = await response.json();
-      return data.exists === true;
-    } catch (error) {
-      console.error('Error checking email:', error);
-      return false;
-    }
-  };
-
-  const registerPasskey = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register-passkey`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-      if (!response.ok) {
-        console.error('Error registering passkey:', response.statusText);
-        setError('Failed to register passkey. Please try again.');
-        setIsLoading(false);
-      } else {
-        const data = await response.json();
-        console.log('Passkey registration response:', data);
-        const publicKey = {
-          ...data.options,
-          challenge: base64urlToUint8Array(data.options.challenge),
-          user: {
-            ...data.options.user,
-            id: base64urlToUint8Array(data.options.user.id),
-          },
-        };
-        // Initiate the WebAuthn credential creation
-        const credential = (await navigator.credentials.create({
-          publicKey,
-        })) as PublicKeyCredential;
-
-        const registrationPayload: RegistrationPayload = {
-          email,
-          user_id: data.user_id,
-          credential: {
-            id: credential.id,
-            rawId: bufferToBase64url(credential.rawId),
-            type: credential.type,
-            response: {
-              attestationObject: bufferToBase64url(
-                (credential.response as AuthenticatorAttestationResponse).attestationObject
-              ),
-              clientDataJSON: bufferToBase64url(
-                (credential.response as AuthenticatorAttestationResponse).clientDataJSON
-              ),
-            },
-            authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
-          },
-        };
-        console.log('registration payload:', registrationPayload);
-      }
-    } catch (error) {
-      console.error('Error during passkey registration:', error);
-      setError('An error occurred while registering the passkey. Please try again.');
-      setIsLoading(false);
-    }
-  };
 
   async function onEmailSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -130,7 +17,7 @@ export default function Authenticate() {
     const result = await checkEmail(email);
     if (!result) {
       console.log('Email does not exist, proceeding to passkey registration');
-      registerPasskey();
+      registerPasskey(email);
     } else {
       console.log('Email exists, proceeding to passkey sign-in');
     }
