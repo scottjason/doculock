@@ -9,6 +9,18 @@ export default function Authenticate() {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<'main' | 'passkey'>('main');
 
+  const base64urlToUint8Array = (base64urlString: string): Uint8Array => {
+    const base64 =
+      base64urlString.replace(/-/g, '+').replace(/_/g, '/') +
+      '='.repeat((4 - (base64urlString.length % 4)) % 4);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  };
+
   const checkEmail = async (email: string): Promise<boolean> => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/check-email`, {
@@ -51,6 +63,17 @@ export default function Authenticate() {
       } else {
         const data = await response.json();
         console.log('Passkey registration response:', data);
+        const publicKey = {
+          ...data.options,
+          challenge: base64urlToUint8Array(data.options.challenge),
+          user: {
+            ...data.options.user,
+            id: base64urlToUint8Array(data.options.user.id),
+          },
+        };
+        // Initiate the WebAuthn credential creation
+        const credentials = await navigator.credentials.create({ publicKey });
+        console.log('WebAuthn credentials created:', credentials);
       }
     } catch (error) {
       console.error('Error during passkey registration:', error);
