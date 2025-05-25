@@ -16,7 +16,9 @@ export function middleware() {
     frame-ancestors 'none';
     default-src 'none';
     script-src 'self' ${origin} 'nonce-${nonce}';
-    style-src 'self' ${origin} 'nonce-${nonce};
+    style-src 'self' ${origin} 'unsafe-inline';
+    object-src 'none';
+    base-uri 'self';
     img-src 'self' ${origin} data:;
     font-src 'self' ${origin};
     connect-src 'self' ${origin} ${apiOrigin};
