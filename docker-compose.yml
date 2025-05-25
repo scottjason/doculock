@@ -25,6 +25,8 @@ services:
       - .env
     volumes:
       - ./backend:/app
+    environment:
+      - ALEMBIC_DATABASE_URL=postgresql://postgres:postgres@db:5432/doculock
 
 volumes:
   pgdata:

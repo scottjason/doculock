@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { checkEmail, registerPasskey } from '../requests/authRequests';
+import { checkEmail, registerPasskeyOptions } from '../requests/authRequests';
 
 export default function Authenticate() {
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export default function Authenticate() {
     const result = await checkEmail(email);
     if (!result) {
       console.log('Email does not exist, proceeding to passkey registration');
-      registerPasskey(email);
+      registerPasskeyOptions(email);
     } else {
       console.log('Email exists, proceeding to passkey sign-in');
     }

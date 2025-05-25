@@ -37,18 +37,15 @@ export const checkEmail = async (email: string): Promise<boolean> => {
   }
 };
 
-export const registerPasskey = async (email: string) => {
+export const registerPasskeyOptions = async (email: string) => {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register-passkey`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/auth/passkey/register/options`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
     if (!response.ok) {
       console.error('Error registering passkey:', response.statusText);
     } else {
@@ -66,7 +63,7 @@ export const registerPasskey = async (email: string) => {
         publicKey,
       })) as PublicKeyCredential;
 
-      const registrationPayload: RegistrationPayload = {
+      const payload: RegistrationPayload = {
         email,
         user_id: data.user_id,
         credential: {
@@ -84,9 +81,31 @@ export const registerPasskey = async (email: string) => {
           authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
         },
       };
-      console.log('registration payload:', registrationPayload);
+      registerPasskeyVerify(payload);
+      console.log('registration payload:', payload);
     }
   } catch (error) {
     console.error('Error during passkey registration:', error);
+  }
+};
+
+export const registerPasskeyVerify = async (payload: RegistrationPayload): Promise<void> => {
+  console.log(payload);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/passkey/register/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      console.error('Error verifying passkey:', response.statusText);
+      throw new Error('Passkey verification failed');
+    }
+    const data = await response.json();
+    console.log('Passkey registration successful:', data);
+  } catch (error) {
+    console.error('Error during passkey verification:', error);
   }
 };
