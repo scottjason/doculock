@@ -6,10 +6,12 @@ import traceback
 from datetime import datetime, timedelta
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.future import select
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException
 from app.db.session import get_session
 from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
+from jwt import decode, ExpiredSignatureError, InvalidTokenError
+
 
 from webauthn import (
     verify_registration_response,
@@ -33,6 +35,19 @@ def get_registration_challenge(user_id):
     return pending_registrations.get(user_id)
 
 
+def verify_token(token: str) -> dict:
+    secret = os.getenv("JWT_SECRET")
+    try:
+        payload = decode(token, secret, algorithms=["HS256"])
+        return payload
+    except ExpiredSignatureError:
+        raise ValueError("Token has expired")
+    except InvalidTokenError:
+        raise ValueError("Invalid token")
+    except Exception as e:
+        raise ValueError(f"Token verification failed: {str(e)}")
+
+
 class EmailCheckRequest(BaseModel):
     email: EmailStr
 
@@ -47,7 +62,21 @@ class RegisterPasskeyVerifyRequest(BaseModel):
     credential: dict
 
 
-@router.post("/check-email")
+@router.get("/verify-token")
+async def check_auth(request: Request):
+    auth = request.headers.get("authorization")
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    token = auth.split(" ")[1]
+    # prin the token for debugging
+    print("Received token:", token)
+    user = verify_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return {"status": "ok", "user": user}
+
+
+@router.post("/verify-email")
 async def check_email(
     request: EmailCheckRequest, session: AsyncSession = Depends(get_session)
 ):
@@ -57,7 +86,7 @@ async def check_email(
         user = result.scalars().first()
         return {"exists": bool(user)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error checking email: {e}")
+        raise HTTPException(status_code=500, detail=f"Error verifying email: {e}")
 
 
 @router.post("/passkey/register/options")

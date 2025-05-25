@@ -19,7 +19,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export const checkEmail = async (email: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/check-email`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/verify-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
