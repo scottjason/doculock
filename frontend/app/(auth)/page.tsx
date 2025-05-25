@@ -80,9 +80,7 @@ export default function Authenticate() {
               onClick={onPasskeySignIn}
               disabled={isLoading}
             >
-              <span className='text-black opacity-70'>
-                {isLoading ? 'Starting Passkey...' : 'Sign in with Passkey'}
-              </span>
+              <span className='text-black opacity-70'>{'Sign in with Passkey'}</span>
             </button>
             {error && <div className='pt-2 text-center text-sm text-red-400'>{error}</div>}
           </>

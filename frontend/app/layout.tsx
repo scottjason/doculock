@@ -1,16 +1,11 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { Roboto } from 'next/font/google';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const roboto = Roboto({
   subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  weight: ['300', '400', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -23,11 +18,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isProd = process.env.NODE_ENV === 'production';
   const headersList = await headers();
-  const nonce = headersList.get('x-nonce') || '';
+  const nonce = isProd ? headersList.get('x-nonce') || '' : '';
   return (
     <html lang='en'>
-      <body nonce={nonce} className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body nonce={nonce} className={`${roboto.className} antialiased`}>
         {children}
       </body>
     </html>
