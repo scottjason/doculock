@@ -3,6 +3,21 @@ import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 
+type RegistrationPayload = {
+  email: string;
+  user_id: string;
+  credential: {
+    id: string;
+    rawId: string;
+    type: string;
+    response: {
+      attestationObject: string;
+      clientDataJSON: string;
+    };
+    authenticatorAttachment?: string;
+  };
+};
+
 export default function Authenticate() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +36,13 @@ export default function Authenticate() {
     return bytes;
   };
 
+  function bufferToBase64url(buffer: ArrayBuffer | Uint8Array): string {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    let binary = '';
+    for (const b of bytes) binary += String.fromCharCode(b);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
   const checkEmail = async (email: string): Promise<boolean> => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/check-email`, {
@@ -35,8 +57,6 @@ export default function Authenticate() {
         return false;
       }
       const data = await response.json();
-      console.log('Email check response:', data);
-      // Assuming the API returns { exists: boolean }
       return data.exists === true;
     } catch (error) {
       console.error('Error checking email:', error);
@@ -72,8 +92,29 @@ export default function Authenticate() {
           },
         };
         // Initiate the WebAuthn credential creation
-        const credentials = await navigator.credentials.create({ publicKey });
-        console.log('WebAuthn credentials created:', credentials);
+        const credential = (await navigator.credentials.create({
+          publicKey,
+        })) as PublicKeyCredential;
+
+        const registrationPayload: RegistrationPayload = {
+          email,
+          user_id: data.user_id,
+          credential: {
+            id: credential.id,
+            rawId: bufferToBase64url(credential.rawId),
+            type: credential.type,
+            response: {
+              attestationObject: bufferToBase64url(
+                (credential.response as AuthenticatorAttestationResponse).attestationObject
+              ),
+              clientDataJSON: bufferToBase64url(
+                (credential.response as AuthenticatorAttestationResponse).clientDataJSON
+              ),
+            },
+            authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
+          },
+        };
+        console.log('registration payload:', registrationPayload);
       }
     } catch (error) {
       console.error('Error during passkey registration:', error);
