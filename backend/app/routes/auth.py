@@ -30,8 +30,8 @@ async def register_passkey(request: RegisterPasskeyRequest):
         options = {
             "challenge": challenge_b64,
             "rp": {
-                "name": "Your App Name",
-                "id": "localhost",  # Use your domain in production
+                "name": "DocuLock",
+                "id": os.getenv("WEBAUTHN_RP_ID", "localhost"),
             },
             "user": {
                 "id": base64.urlsafe_b64encode(user_id.encode()).decode(),
