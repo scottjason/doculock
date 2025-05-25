@@ -1,7 +1,9 @@
 import os
+import jwt
 import uuid
 import base64
 import traceback
+from datetime import datetime, timedelta
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.future import select
 from fastapi import APIRouter, Depends, HTTPException
@@ -145,7 +147,17 @@ async def verify_passkey_registration(
         # Remove challenge from in-memory store
         pending_registrations.pop(request.user_id, None)
 
-        return {"success": True}
+        # create JWT token
+        payload = {
+            "sub": str(user.id),
+            "email": user.email,
+            "exp": datetime.utcnow() + timedelta(days=7),  # 7 day expiry
+        }
+
+        JWT_ALGORITHM = "HS256"
+        JWT_SECRET = os.getenv("JWT_SECRET")
+        token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        return {"success": True, "token": token}
     except Exception as e:
         print("Exception in /passkey/register/verify:", e)
         traceback.print_exc()
