@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { checkEmail, registerPasskeyOptions } from '../requests/authRequests';
 
 export default function Authenticate() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,13 @@ export default function Authenticate() {
     const result = await checkEmail(email);
     if (!result) {
       console.log('Email does not exist, proceeding to passkey registration');
-      registerPasskeyOptions(email);
+      try {
+        await registerPasskeyOptions(email);
+        router.push('/dashboard');
+      } catch (err) {
+        console.error('Error during passkey registration:', err);
+        setError('Failed to register passkey. Please try again.');
+      }
     } else {
       console.log('Email exists, proceeding to passkey sign-in');
     }

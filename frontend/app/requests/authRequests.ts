@@ -112,8 +112,9 @@ export const registerPasskeyVerify = async (payload: RegistrationPayload): Promi
       },
       body: JSON.stringify({ token: token }),
     });
-    console.log('Passkey registration successful, JWT set');
+    return Promise.resolve();
   } catch (error) {
     console.error('Error during passkey verification:', error);
+    Promise.reject(error);
   }
 };
