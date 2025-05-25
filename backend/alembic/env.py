@@ -13,11 +13,9 @@ from alembic import context
 config = context.config
 config.set_main_option(
     "sqlalchemy.url",
-    os.getenv(
-        "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@db:5432/doculock"
-    ),
+    os.getenv("DATABASE_URL")
+    or "postgresql+asyncpg://postgres:postgres@db:5432/doculock",
 )
-
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
