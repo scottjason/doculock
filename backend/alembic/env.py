@@ -17,7 +17,7 @@ if config.config_file_name is not None:
 
 # Import your models and Base
 from app.models.base import Base
-from app.models import user, file, shared_file
+from app.models import user, file, shared_file, base
 
 target_metadata = Base.metadata
 
