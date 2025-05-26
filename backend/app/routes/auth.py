@@ -170,8 +170,7 @@ async def verify_passkey_registration(
             credential_id=cred["id"],
             public_key=registration_verification.credential_public_key.hex(),  # as hex string
         )
-        session.add(user)
-        await session.commit()
+        await User.create(user, session)
 
         # Remove challenge from in-memory store
         pending_registrations.pop(request.user_id, None)
