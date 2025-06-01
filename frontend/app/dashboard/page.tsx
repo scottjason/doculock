@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers'; // or 'next-auth' if you use it
+import { cookies } from 'next/headers';
 import Dashboard from './Dashboard';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
