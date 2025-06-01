@@ -37,7 +37,6 @@ async function isAuthenticatedUser(): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  console.log('Middleware triggered for:', request.nextUrl.pathname);
   const isProd = process.env.NODE_ENV === 'production';
   const apiOrigin = process.env.API_ORIGIN;
   const origin = 'https://doculock.vercel.app';
